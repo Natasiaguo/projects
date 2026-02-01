@@ -17,6 +17,7 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 words_dict = {}
 count = 1
+# Let user to provide the spelling words line by line
 while True:
     words = input("请写下来你的听写字。如果写完了，请安‘1’: ")
     if words == "1":
@@ -24,6 +25,8 @@ while True:
     words_dict[count] = words
     count += 1
 print("Press Enter to start the 听写：")
+
+# another input
 input()
 clear_screen()
 time.sleep(0.1)
