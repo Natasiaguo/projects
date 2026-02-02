@@ -1,3 +1,4 @@
+# learning
 # completed 23/01/2026
 
 # Chinese Spelling Coach
@@ -17,7 +18,7 @@ This program allows users to:
 - Repeat a word or move to the next one
 - View all words at the end for marking
 
-## Technologies Used
+## Technologies I learnt to use
 - Python
 - Google Text-to-Speech (gTTS)
 
