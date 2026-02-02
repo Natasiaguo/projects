@@ -1,5 +1,5 @@
 # printing in teminal
-print("Hello, world!")
+print("Hello, World!")
 
 #variable
 name = "Bob" # string
