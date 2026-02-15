@@ -1,5 +1,4 @@
 # learning
-# completed 23/01/2026
 
 # Chinese Spelling Coach
 A Python-based Chinese spelling practice tool that allows students to practise independently using text-to-speech.
