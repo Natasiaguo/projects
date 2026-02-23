@@ -2,6 +2,7 @@ import customtkinter as ctk
 from gtts import gTTS
 import random
 import os
+import time
 
 root = ctk.CTk()
 root.geometry("700x650")
@@ -32,7 +33,6 @@ def add_word():
         words.append(word)
         listbox.configure(state="normal")  # Enable to insert
         listbox.insert("end", word + "\n")
-        listbox.configure(state="disabled")  # Keep it read-only
         entry.delete(0, "end")
 
 def start_practice():
@@ -57,6 +57,12 @@ def start_practice():
         word_index = 0
         next_word()
 
+def speak_numbered(word, number):
+    # Say the number first
+    speak(f"第{number}")  # "第1个", "第2个" etc.
+    time.sleep(0.5)            # wait 1 second before saying the word
+    speak(word)              # then speak the actual word
+
 def next_word():
     global current_word, word_index
     if word_index < len(words):   # If words remain
@@ -65,7 +71,7 @@ def next_word():
         spoken_words.append(current_word) # Save it
         word_index += 1 # Move index forward
         status_label.configure(text=f"正在播放词语 ({word_index}/{len(practice_words)})")
-        speak(current_word) # Speak word
+        speak_numbered(current_word, word_index) # Speak word
         next_button.configure(state="normal")  # Re-enable next button
         
     else:
