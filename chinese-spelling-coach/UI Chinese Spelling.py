@@ -44,7 +44,9 @@ def add_number(event):
 def start_practice():
     global practice_words, spoken_words, word_index, words
     start_button.configure(state="disabled")
-    
+    repeat_button.configure(state="normal")
+    next_button.configure(state="normal")
+
     listbox_text = listbox.get("1.0", "end").strip()
     
     if not listbox_text:
@@ -165,70 +167,79 @@ def load_progress():
     except FileNotFoundError:
         status_label.configure(text="没有找到保存的进度！")  
 
-def clear_saved_progress():
-    if mb.askyesno("确认", "确定要删除所有已保存的词语吗？"):
-        with open("saved_words.txt", "w", encoding="utf-8") as f:
-            pass  # Overwrites file with empty content
-        
-        status_label.configure(text="已清除保存的词语！")
-
-# ---------------- USER INTERFACE ----------------
+## ---------------- USER INTERFACE ----------------
 ctk.set_appearance_mode("light")
 
 root = ctk.CTk()
-root.geometry("700x650")
+root.attributes("-fullscreen", True)
 root.title("听写练习")
 root.configure(fg_color="#CFE3F8")
 
 main_frame = ctk.CTkFrame(root, fg_color="#CFE3F8")
-main_frame.pack(anchor="w", padx=30, pady=30)
+main_frame.pack(expand=True, fill="both")
 
-title_label = ctk.CTkLabel(main_frame, text="听写练习", font=ctk.CTkFont(family="Arial", weight="bold", size=28))
-title_label.pack(anchor="w", pady=10)
+# title
+title_label = ctk.CTkLabel(main_frame, text="听写练习", font=ctk.CTkFont(family="Arial", weight="bold", size=30))
+title_label.pack(anchor="n", pady=(20,10), padx=20)
 
-word_label = ctk.CTkLabel(main_frame, text="请在下方输入词语，每行一个词语，按Enter自动编号：", font=ctk.CTkFont(family="Arial", size=16), justify="left", anchor="w")
-word_label.pack(anchor="w", pady=(10, 10))
+# instructions
+word_label = ctk.CTkLabel(main_frame, text="请在下方输入词语，每行一个词语，按Enter自动编号：", font=ctk.CTkFont(family="Arial", size=18), justify="left", anchor="w")
+word_label.pack(anchor="w", pady=(10, 10), padx=20)
 
-listbox = ctk.CTkTextbox(main_frame, width=400, height=120, font=ctk.CTkFont(size=14))
-listbox.pack(anchor="w", pady=(0, 20))
+#input section
+input_section_label = ctk.CTkLabel(main_frame, text="词语输入", font=ctk.CTkFont(size=22, weight="bold"))
+input_section_label.pack(anchor="w", pady=(0,10),padx=50)
+
+listbox = ctk.CTkTextbox(main_frame, width=400, height=120, font=ctk.CTkFont(size=16))
+listbox.pack(fil="both", expand=True, padx=50, pady=(0,10))
 listbox.bind("<Return>", add_number)
 initialize_listbox()
 
 listbox.see("end")  # make sure it's visible
 
+# buttons
 button_frame = ctk.CTkFrame(main_frame, fg_color="#CFE3F8")
-button_frame.pack(anchor="w", pady=(10,0))
+button_frame.pack(padx=50, pady=(10,5), fill="x")
 
-start_button = ctk.CTkButton(button_frame, text="开始", command=start_practice)
+start_button = ctk.CTkButton(button_frame, text="开始", fg_color="#1FAD5A", hover_color="#3E9647", width=120, height=50, font=ctk.CTkFont(size=16), command=start_practice)
 start_button.pack(side="left", padx=5)
 
-repeat_button = ctk.CTkButton(button_frame, text="重复播放", command=repeat_word)
+repeat_button = ctk.CTkButton(button_frame, text="重复播放", width=120, height=50, font=ctk.CTkFont(size=16), command=repeat_word)
 repeat_button.pack(side="left", padx=5)
 
-next_button = ctk.CTkButton(button_frame, text="下一个", command=next_word)
+next_button = ctk.CTkButton(button_frame, text="下一个", fg_color="#74571E", hover_color="#57461D", width=120, height=50,font=ctk.CTkFont(size=16),command=next_word)
 next_button.pack(side="left", padx=5)
 
-abort_button = ctk.CTkButton(button_frame, text="结束测试", command=abort_test)
+abort_button = ctk.CTkButton(button_frame, text="结束测试", fg_color="#F40C0C", hover_color="#C40202", width=120, height=50, font=ctk.CTkFont(size=16),command=abort_test)
 abort_button.pack(side="left", padx=5)
 
-status_label = ctk.CTkLabel(main_frame, text="", font=ctk.CTkFont(family="Arial", size=14))
+repeat_button.configure(state="normal")
+next_button.configure(state="normal")
+
+# status
+status_label = ctk.CTkLabel(main_frame, text="", font=ctk.CTkFont(family="Arial", size=18))
 status_label.pack(anchor="w", padx=(15, 5))
 
-summary_textbox = ctk.CTkTextbox(main_frame, width=400, height=150, font=ctk.CTkFont(size=14))
-summary_textbox.pack(anchor="w", pady=(10, 10))
+# summary section
+summary_frame = ctk.CTkFrame(main_frame, fg_color="#CFE3F8")
+summary_frame.pack(fill="both", expand=True, padx=50, pady=(10,10))
+
+summary_section_label = ctk.CTkLabel(summary_frame, text="听写总结", font=ctk.CTkFont(size=22, weight="bold"))
+summary_section_label.pack(anchor="w", pady=(0,5))
+
+summary_textbox = ctk.CTkTextbox(summary_frame, font=ctk.CTkFont(size=16))
+summary_textbox.pack(fill="both", expand=True)
 summary_textbox.configure(state="disabled")
 
+# save/load buttons
 progress_frame = ctk.CTkFrame(main_frame, fg_color="#CFE3F8")
-progress_frame.pack(anchor="w", pady=(10,0))
+progress_frame.pack(padx=50, pady=(5,20), fill="x")
 
-save_button = ctk.CTkButton(progress_frame, text="保存词语", command=save_progress)
+save_button = ctk.CTkButton(progress_frame, text="保存词语", width=120, height=50, font=ctk.CTkFont(size=16),command=save_progress)
 save_button.pack(side="left", padx=5)
 
-load_button = ctk.CTkButton(progress_frame, text="加载词语", command=load_progress)
+load_button = ctk.CTkButton(progress_frame, text="加载词语", width=120, height=50, font=ctk.CTkFont(size=16), command=load_progress)
 load_button.pack(side="left", padx=5)
-
-clear_button = ctk.CTkButton(progress_frame, text="清除保存", command=clear_saved_progress)
-clear_button.pack(side="left", padx=5)
 
 # ---------------- MAIN LOOP ----------------
 root.mainloop()
