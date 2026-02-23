@@ -3,6 +3,7 @@ from gtts import gTTS
 import random
 import os
 import time
+import tkinter.messagebox as mb
 
 # ---------------- GLOBAL STATE ----------------
 words = []             # All words added by user
@@ -98,18 +99,21 @@ def initialize_listbox():
     listbox.insert("end", f"{current_number}. ")
 
 def abort_test():
-    global current_word, word_index
-    current_word = None
-    word_index = 0
-    status_label.configure(text="测试已中止！")
-    
-    summary_textbox.configure(state="normal")
-    summary_textbox.delete("1.0", "end")    # Clear summary
-    summary_textbox.configure(state="disabled")
-    
-    start_button.configure(state="normal")  # Allow restarting
-    repeat_button.configure(state="disabled")
-    next_button.configure(state="disabled")
+    if mb.askyesno("确认", "确定要结束测试吗？"):
+        global current_word, word_index
+        current_word = None
+        word_index = 0
+        status_label.configure(text="测试已中止！")
+        
+        summary_textbox.configure(state="normal")
+        summary_textbox.delete("1.0", "end")    # Clear summary
+        summary_textbox.configure(state="disabled")
+        
+        start_button.configure(state="normal")  # Allow restarting
+        repeat_button.configure(state="disabled")
+        next_button.configure(state="disabled")
+    else:
+        pass    
     initialize_listbox()
 
 # ---------------- USER INTERFACE ----------------
