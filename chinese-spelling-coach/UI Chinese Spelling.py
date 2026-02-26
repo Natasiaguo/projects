@@ -111,7 +111,7 @@ def abort_test():
         summary_textbox.delete("1.0", "end")    # Clear summary
         summary_textbox.configure(state="disabled")
         
-        start_button.configure(state="normal")  # Allow restarting
+        start_button.configure(state="normal") 
         repeat_button.configure(state="disabled")
         next_button.configure(state="disabled")
     else:

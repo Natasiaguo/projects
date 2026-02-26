@@ -1,5 +1,3 @@
-# learning
-
 # Chinese Spelling Coach
 A Python-based Chinese spelling practice tool that allows students to practise independently using text-to-speech.
 
@@ -17,6 +15,7 @@ This program allows users to:
 - Repeat a word or move to the next one
 - View all words at the end for marking
 
+# Version 1: Terminal
 ## Technologies I learnt to use
 - Python
 - Google Text-to-Speech (gTTS)
@@ -27,6 +26,30 @@ This program allows users to:
 - Improving program functionality through iteration
 
 ## Future Improvements
-- Add scoring and accuracy tracking
 - Add a graphical user interface
 - Apply version control from the start
+
+# Version 2(User Interface)
+## What I learnt:
+- Creating and linking buttons to functions
+- Enabling and disabling buttons
+- Customising frame colours for better UI design
+- Implementing version control
+- Saving and loading user progress
+- Adding indexed word tracking in a Listbox
+
+## Improvements made:
+- Replaced keyboard-triggered commands with buttons for improved usability
+- Implemented conditional button activation to prevent invalid actions
+- Enhanced UI aesthetics through improved colour schemes
+- Added automatic word indexing to track vocabulary count
+- Enabled users to save and reload progress, without the need to keep re-entering words
+- Allowed users to skip or quit at any time without waiting for audio playback to finish
+
+## Technologies I learnt to use:
+- customtkinter (for User Interface)
+
+## Future Improvements:
+- Implement adjustable speech speed control for personalised learning
+- Develop a web-based version to increase accessibility and reach more users
+- Integrate cloud-based progress saving to enable cross-device access and long-term tracking
