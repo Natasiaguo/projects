@@ -29,7 +29,7 @@ This program allows users to:
 - Add a graphical user interface
 - Apply version control from the start
 
-# Version 2(User Interface)
+# Version 2: User Interface
 ## What I learnt:
 - Creating and linking buttons to functions
 - Enabling and disabling buttons
