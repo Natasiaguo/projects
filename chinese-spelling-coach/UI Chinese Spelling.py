@@ -165,7 +165,7 @@ def load_progress():
         status_label.configure(text="词语已加载！")
 
     except FileNotFoundError:
-        status_label.configure(text="没有找到保存的进度！")  
+        status_label.configure(text="没有找到保存的进度！")     
 
 ## ---------------- USER INTERFACE ----------------
 ctk.set_appearance_mode("light")
