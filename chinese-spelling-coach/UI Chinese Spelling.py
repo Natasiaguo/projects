@@ -4,6 +4,8 @@ import random
 import os
 import time
 import tkinter.messagebox as mb
+import subprocess
+import json
 
 # ---------------- GLOBAL STATE ----------------
 words = []             # All words added by user
@@ -12,26 +14,52 @@ spoken_words = []      # Words already spoken
 current_word = None
 word_index = 0
 current_number = 1
+audio_process = None
+audio_playing = False
+callback = None
 
 # ---------------- FUNCTIONS ----------------
-def speak(word):
+def speak(word, callback=None):
+    global audio_process, audio_playing
+
+    audio_playing = True
     repeat_button.configure(state="disabled")
+    next_button.configure(state="disabled")
+    start_button.configure(state="disabled")
     if os.path.exists("word.mp3"):
         os.remove("word.mp3")
     tts = gTTS(text=word, lang="zh-cn")
     tts.save("word.mp3")
+    if audio_process and audio_process.poll() is None: # if audio is still playing, stop it safely before starting new one
+        audio_process.terminate()
+    
+    # Play audio without blocking
+    if os.name == "nt":  # Windows
+        audio_process = subprocess.Popen(["start", "word.mp3"], shell=True)
+    else:  # Mac / Linux
+        audio_process = subprocess.Popen(["afplay", "word.mp3"])
 
-    if os.name == "nt":
-        os.system("start /wait word.mp3")
+    check_audio_finished(callback)
+
+def check_audio_finished(callback=None):
+    global audio_process, audio_playing
+    if audio_process.poll() is None:
+        # still playing -> check again in 200ms
+        root.after(200, lambda: check_audio_finished(callback))
     else:
-        os.system("afplay word.mp3")
-    repeat_button.configure(state="normal")
+        audio_playing = False
+        if callback:
+            callback()
+        else:    
+            repeat_button.configure(state="normal")
+            next_button.configure(state="normal")
+            start_button.configure(state="normal")
 
 def speak_numbered(word, number):
     # Say number first, then the word
-    speak(f"第{number}")
-    time.sleep(0.5)
-    speak(word)
+    def speak_word():
+        speak(word)
+    speak(f"第{number}", callback=lambda: speak_word())
 
 def add_number(event):
     # Add new number on Enter press
@@ -44,11 +72,10 @@ def add_number(event):
 def start_practice():
     global practice_words, spoken_words, word_index, words
     start_button.configure(state="disabled")
-    repeat_button.configure(state="normal")
-    next_button.configure(state="normal")
 
     listbox_text = listbox.get("1.0", "end").strip()
-    
+    listbox.delete("1.0", "end")
+    listbox.configure(state="disabled")  # disable editing during practice
     if not listbox_text:
         status_label.configure(text="请先添加词语！")
         start_button.configure(state="normal")
@@ -75,7 +102,7 @@ def next_word():
         word_index += 1
         status_label.configure(text=f"正在播放词语 ({word_index}/{len(practice_words)})")
         speak_numbered(current_word, word_index)
-        next_button.configure(state="normal")
+        
     else:
         current_word = None
         status_label.configure(text="听写完成！")
@@ -85,7 +112,7 @@ def next_word():
 def repeat_word():
     if current_word:
         speak(current_word)
-
+        
 def show_summary():
     summary_textbox.configure(state="normal")
     summary_textbox.delete("1.0", "end")
@@ -119,50 +146,47 @@ def abort_test():
     initialize_listbox()
 
 def save_progress():
-    text = listbox.get("1.0", "end").strip() # Get all text from listbox and strip whitespace
-
-    if not text:
+    if not practice_words:
         status_label.configure(text="没有词语可保存！")
         return
-    
-    lines = text.split("\n") # Split text into lines
-    raw_words = [] # Create a list to hold the raw words without numbering
-
-    for line in lines:
-        line = line.strip() # Remove leading/trailing whitespace
-        if not line: 
-            continue
-
-        if ". " in line:
-            word = line.split(". ", 1)[1].strip() # Split on the first occurrence of ". " and take the second part as the word
-        else:
-            word = line
-        raw_words.append(word) # If there's no numbering, just add the line as a word
-
-    with open("saved_words.txt", "w", encoding="utf-8") as f: 
-        for word in raw_words:
-            f.write(word + "\n")
+    listbox_text = listbox.get("1.0", "end").strip()
+    data = {
+        "practice_words": practice_words,
+        "word_index": word_index,
+        "spoken_words": spoken_words,
+        "listbox_text": listbox_text
+    }
+    with open("test_progress.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
     status_label.configure(text="词语已保存！")
 
 def load_progress():
-    global current_number
+    global practice_words, spoken_words, word_index, words, current_word
 
     try:
-        with open("saved_words.txt", "r", encoding="utf-8") as f:
-            raw_words = [line.strip() for line in f if line.strip()]
-        if not raw_words:
-            status_label.configure(text="没有保存的进度！")
-            return
+        with open("test_progress.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-        listbox.configure(state="normal")
+        practice_words = data["practice_words"]
+        spoken_words = data["spoken_words"]
+        word_index = data["word_index"]
+        words[:] = practice_words
+
+        listbox.configure(state="normal") 
         listbox.delete("1.0", "end")
+        listbox.insert("1.0", data.get("listbox_text", ""))   
+        listbox.see("end")
 
-        for i, word in enumerate(raw_words, start=1):
-            listbox.insert("end", f"{i}. {word}\n")
+        if word_index < len(practice_words):
+            current_word = words[word_index]
+            status_label.configure(text=f"已加载测试进度！下一个词语: {word_index + 1}/{len(practice_words)}")
+        else:
+            current_word = None
+            status_label.configure(text="听写已完成！")
 
-        current_number = len(raw_words)
-
-        status_label.configure(text="词语已加载！")
+        start_button.configure(state="disabled")
+        repeat_button.configure(state="normal")
+        next_button.configure(state="normal")
 
     except FileNotFoundError:
         status_label.configure(text="没有找到保存的进度！")     
@@ -180,18 +204,18 @@ main_frame.pack(expand=True, fill="both")
 
 # title
 title_label = ctk.CTkLabel(main_frame, text="听写练习", font=ctk.CTkFont(family="Arial", weight="bold", size=30))
-title_label.pack(anchor="n", pady=(20,10), padx=20)
+title_label.pack(anchor="n", pady=(20,10), padx=50)
 
 # instructions
 word_label = ctk.CTkLabel(main_frame, text="请在下方输入词语，每行一个词语，按Enter自动编号：", font=ctk.CTkFont(family="Arial", size=18), justify="left", anchor="w")
-word_label.pack(anchor="w", pady=(10, 10), padx=20)
+word_label.pack(anchor="w", pady=(10, 10), padx=50)
 
 #input section
 input_section_label = ctk.CTkLabel(main_frame, text="词语输入", font=ctk.CTkFont(size=22, weight="bold"))
 input_section_label.pack(anchor="w", pady=(0,10),padx=50)
 
 listbox = ctk.CTkTextbox(main_frame, width=400, height=120, font=ctk.CTkFont(size=16))
-listbox.pack(fil="both", expand=True, padx=50, pady=(0,10))
+listbox.pack(fill="both", expand=True, padx=50, pady=(0,10))
 listbox.bind("<Return>", add_number)
 initialize_listbox()
 
